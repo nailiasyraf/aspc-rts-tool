@@ -12,6 +12,37 @@ function expandAbbreviations(value: string): string {
   return value.replace(/\bl\s*(\d+)\b/g, "level $1");
 }
 
+/**
+ * Modifier tokens that appear as prefixes in website titles (e.g.
+ * "NVIDIA Airflow Ultimate : X3D Gaming"). Their presence/absence must
+ * align between the XLSX build name and the website title, or sibling
+ * variants with the same CPU/GPU will steal each other's match.
+ */
+const MODIFIER_WORDS = new Set([
+  "special",
+  "showcase",
+  "nvidia",
+  "airflow",
+  "supreme",
+  "ultimate",
+  "insane",
+  "icue",
+  "lunchbox",
+  "black",
+  "white",
+  "focus",
+  "atomic",
+  "pro",
+]);
+
+function modifierSet(name: string): Set<string> {
+  return new Set(
+    normalize(name)
+      .split(" ")
+      .filter((token) => MODIFIER_WORDS.has(token))
+  );
+}
+
 function tokenSet(value: string): Set<string> {
   return new Set(
     normalize(value)
@@ -50,11 +81,12 @@ function extractGpuKey(gpu: string | undefined): string | null {
  * FUZZY are an order of magnitude apart) and component keys (CPU / GPU)
  * only break ties between same-name variants.
  *
- * "SPECIAL" is likewise a strong tie-breaker: the site sells both plain and
- * Special variants of the same build (e.g. "Level 8 X3D Gaming" vs
- * "Special : Level 8 X3D Gaming"), often with identical CPU/GPU. A build
- * whose XLSX name contains SPECIAL must prefer the Special variant, and a
- * plain build must prefer the plain variant.
+ * Modifier alignment: the site sells sibling variants that share the same
+ * build body (e.g. "Airflow Ultimate : X3D Gaming" vs "NVIDIA Airflow
+ * Ultimate : X3D Gaming", or plain vs "Special : ..." variants) often with
+ * identical CPU/GPU. Modifier words (SPECIAL, NVIDIA, AIRFLOW, ...) must
+ * align between the XLSX name and the website title, or a sibling steals
+ * the match.
  *
  * Acceptance:
  *   exact or contained name match       -> accepted
@@ -69,10 +101,10 @@ export function matchLiveProduct(
   const EVIDENCE_CONTAINED = 80;
   const EVIDENCE_FUZZY = 50;
   const COMPONENT_BONUS = 1;
-  const SPECIAL_MISMATCH_PENALTY = 25;
+  const MODIFIER_MISMATCH_PENALTY = 25;
 
   const buildName = normalize(build.name);
-  const buildHasSpecial = /\bspecial\b/.test(buildName);
+  const buildModifiers = modifierSet(build.name);
   const nameTokens = tokenSet(build.name);
   const cpuKey = extractCpuKey(build.cpu);
   const gpuKey = extractGpuKey(build.gpu);
@@ -116,12 +148,16 @@ export function matchLiveProduct(
       components += 1;
     }
 
-    // SPECIAL presence alignment: same evidence and components must not
-    // let a plain build steal the Special variant's slot (or vice versa).
-    const productHasSpecial = /\bspecial\b/.test(title);
-    if (buildHasSpecial !== productHasSpecial) {
-      score -= SPECIAL_MISMATCH_PENALTY;
-    }
+    // Modifier alignment: penalize variants whose modifier words differ
+    // from the XLSX build name (e.g. plain build vs "NVIDIA Airflow ...").
+    const titleModifiers = modifierSet(rawTitle);
+    const symmetricDiff = new Set(
+      [...buildModifiers, ...titleModifiers].filter(
+        (token) =>
+          !buildModifiers.has(token) || !titleModifiers.has(token)
+      )
+    );
+    score -= symmetricDiff.size * MODIFIER_MISMATCH_PENALTY;
 
     if (score > bestScore) {
       bestScore = score;

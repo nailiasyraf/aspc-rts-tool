@@ -16,6 +16,7 @@ import { BuildView } from "@/components/BuildView";
 import { BrochureView } from "@/components/BrochureView";
 import { FileUploader } from "@/components/FileUploader";
 import { ResizableSidebar } from "@/components/ResizableSidebar";
+import { APP_VERSION } from "@/lib/version";
 
 function EmptyState({
   onFile,
@@ -32,6 +33,9 @@ function EmptyState({
         <FileUp className="mx-auto h-10 w-10 text-zinc-700" />
         <h2 className="mt-5 text-lg font-bold tracking-[0.14em] text-zinc-300">
           ASPC RTS TOOL
+          <span className="ml-2 rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] font-semibold tracking-normal text-zinc-500">
+            {APP_VERSION}
+          </span>
         </h2>
         <p className="mt-2 text-sm text-zinc-500">
           Upload the latest XLSX file to browse Marketing builds.

@@ -58,6 +58,13 @@ const testBuilds = [
   mk({ name: "Special AMD X3D Level 8X", cpu: "AMD Ryzen 7 9800X3D", gpu: "Radeon RX 9070 XT" }),
   // Plain variant must NOT steal the Special product.
   mk({ name: "AMD X3D Level 8X", cpu: "AMD Ryzen 7 9800X3D", gpu: "Radeon RX 9070 XT" }),
+  // NVIDIA/AIRFLOW modifiers: sibling variants share CPU/GPU; prefix must align.
+  mk({ name: "NVIDIA Airflow Ultimate X3D Gaming", cpu: "AMD Ryzen 7 9800X3D", gpu: "GeForce RTX 5080 16GB" }),
+  mk({ name: "Airflow Ultimate X3D Gaming", cpu: "AMD Ryzen 7 9800X3D", gpu: "GeForce RTX 5080 16GB" }),
+  mk({ name: "NVIDIA Ultimate X3D Gaming", cpu: "AMD Ryzen 7 9800X3D", gpu: "GeForce RTX 5080 16GB" }),
+  mk({ name: "Airflow Ultimate Intel Extreme", cpu: "Intel Core Ultra 7 270K", gpu: "GeForce RTX 5080 16GB" }),
+  mk({ name: "Showcase Special Supreme Intel Extreme", cpu: "Intel Core Ultra 7 270K", gpu: "GeForce RTX 5080 16GB" }),
+  mk({ name: "Special Supreme Intel Extreme", cpu: "Intel Core Ultra 7 270K", gpu: "GeForce RTX 5080 16GB" }),
   // Genuinely absent product.
   mk({ name: "Level 2 Intel", cpu: "Intel Core i5 14400F", gpu: "RTX 5060 Ti" }),
   // Different name, different components — must NOT match.

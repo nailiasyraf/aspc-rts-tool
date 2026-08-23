@@ -6,7 +6,7 @@ const html = await (
   })
 ).text();
 
-const names: string[] = [];
+const products: { name: string }[] = [];
 for (const block of html.matchAll(
   /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g
 )) {
@@ -15,22 +15,23 @@ for (const block of html.matchAll(
     if (d["@type"] !== "ItemList") continue;
     for (const el of d.itemListElement) {
       const p = el.item ?? el;
-      if (p["@type"] === "Product") names.push(p.name);
+      if (p["@type"] === "Product") products.push({ name: p.name });
     }
   } catch {
     // skip
   }
 }
 
+const names = products.map((p) => p.name.split("/")[0].trim());
+const airflow = names.filter((n) => /airflow/i.test(n));
+const uniqueFirstTokens = [...new Set(names.map((n) => n.split(/[\s:]/)[0]))];
+
 writeFileSync(
-  "sp.txt",
-  names.filter((n) => /special/i.test(n)).join("\n") +
-    "\n---prefix formats---\n" +
-    names
-      .filter((n) => /[:]/.test(n))
-      .map((n) => n.split("/")[0].trim())
-      .filter((v, i, a) => a.indexOf(v) === i)
-      .join("\n"),
+  "af.txt",
+  airflow.join("\n") +
+    "\n---unique first tokens---\n" +
+    uniqueFirstTokens.join(", ") +
+    "\n",
   "utf8"
 );
 console.log("done");

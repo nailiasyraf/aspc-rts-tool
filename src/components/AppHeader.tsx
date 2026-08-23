@@ -5,6 +5,7 @@ import { FileUploader } from "@/components/FileUploader";
 import { ViewSwitcher, type ViewMode } from "@/components/ViewSwitcher";
 import { ParserWarnings } from "@/components/ParserWarnings";
 import type { PCBuild } from "@/types/pc-build";
+import { APP_VERSION } from "@/lib/version";
 
 type AppHeaderProps = {
   loaded: LoadedWorkbook | null;
@@ -36,6 +37,9 @@ export function AppHeader({
       <div className="min-w-0">
         <h1 className="text-sm font-bold tracking-[0.18em] text-zinc-50">
           ASPC RTS TOOL
+          <span className="ml-2 rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] font-semibold tracking-normal text-zinc-400">
+            {APP_VERSION}
+          </span>
         </h1>
         {loaded ? (
           <p className="mt-0.5 truncate text-[11px] text-zinc-500">

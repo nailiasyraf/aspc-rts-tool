@@ -15,6 +15,17 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "ASPC RTS Tool",
   description: "Browse and copy PC build specs from the Marketing XLSX.",
+  openGraph: {
+    title: "ASPC RTS TOOL",
+    description: "Build Browser · Brochure Specs · Live Pricing",
+    images: ["/og"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ASPC RTS TOOL",
+    description: "Build Browser · Brochure Specs · Live Pricing",
+    images: ["/aspc_thumb.png"],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
