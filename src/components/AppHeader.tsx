@@ -35,7 +35,7 @@ export function AppHeader({
     <header className="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-zinc-800 bg-zinc-950 px-6 py-3">
       <div className="min-w-0">
         <h1 className="text-sm font-bold tracking-[0.18em] text-zinc-50">
-          ASPC RTS BUILDS BROWSER
+          ASPC RTS TOOL
         </h1>
         {loaded ? (
           <p className="mt-0.5 truncate text-[11px] text-zinc-500">

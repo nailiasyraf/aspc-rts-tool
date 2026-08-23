@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ASPC RTS Builds Browser",
+  title: "ASPC RTS Tool",
   description: "Browse and copy PC build specs from the Marketing XLSX.",
 };
 

@@ -31,7 +31,7 @@ function EmptyState({
       <div className="max-w-md text-center">
         <FileUp className="mx-auto h-10 w-10 text-zinc-700" />
         <h2 className="mt-5 text-lg font-bold tracking-[0.14em] text-zinc-300">
-          ASPC RTS BUILDS BROWSER
+          ASPC RTS TOOL
         </h2>
         <p className="mt-2 text-sm text-zinc-500">
           Upload the latest XLSX file to browse Marketing builds.
