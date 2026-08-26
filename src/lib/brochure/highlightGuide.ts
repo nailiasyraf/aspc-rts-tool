@@ -11,7 +11,7 @@ export const HIGHLIGHT_PALETTE = {
   intelProcessor: { label: "INTEL PROCESSOR", hex: "#00AEEF" },
   nvidiaGpu: { label: "NVIDIA GPU", hex: "#7CFF00" },
   amdGpu: { label: "AMD GPU", hex: "#FF2D2D" },
-  ssdR7: { label: "SSD R:7XXX", hex: "#C15CFF" },
+  ssdR7: { label: "SSD R:7XXX", hex: "#F448FF" },
   ram6000: { label: "RAM 6XXXMHZ", hex: "#FFE600" },
   goldPsu: { label: "GOLD PSU", hex: "#FFC928" },
 } satisfies Record<string, { label: string; hex: string }>;
