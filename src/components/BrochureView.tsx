@@ -8,6 +8,8 @@ import { CopySpecsButton } from "@/components/CopySpecsButton";
 import { HighlightColorGuide } from "@/components/HighlightColorGuide";
 import { LiveProductPanel } from "@/components/LiveProductPanel";
 import { detectHighlights } from "@/lib/brochure/highlightGuide";
+import { TikTokPricingPanel } from "@/components/TikTokPricingPanel";
+import type { TikTokProduct } from "@/types/tiktok-pricing";
 
 function PriceBlocks({ build }: { build: PCBuild }) {
   if (build.salePrice === undefined) {
@@ -106,7 +108,7 @@ function BrochureCard({ build }: { build: PCBuild }) {
   );
 }
 
-export function BrochureView({ build }: { build: PCBuild }) {
+export function BrochureView({ build, tiktokProduct }: { build: PCBuild; tiktokProduct?: TikTokProduct | null }) {
   const specs = formatBrochureSpecs(build);
   const highlights = detectHighlights(build);
 
@@ -125,6 +127,7 @@ export function BrochureView({ build }: { build: PCBuild }) {
           <div className="mt-8">
             <CopySpecsButton specs={specs} />
           </div>
+          {tiktokProduct && <TikTokPricingPanel product={tiktokProduct} />}
         </div>
 
         {/* Right — Highlight Color Guide (compact reference) */}

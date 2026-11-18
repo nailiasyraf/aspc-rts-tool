@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { TikTokProduct } from "./tiktok-pricing";
 
 export const PC_BUILD_SCHEMA = z.object({
   id: z.string(),
@@ -40,4 +41,5 @@ export type LoadedWorkbook = {
   builds: PCBuild[];
   warnings: ParserWarning[];
   loadedAt: Date;
+  tiktokProducts: TikTokProduct[];
 };

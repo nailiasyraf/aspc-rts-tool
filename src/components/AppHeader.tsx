@@ -14,6 +14,8 @@ type AppHeaderProps = {
   onFile: (file: File) => void;
   loading: boolean;
   builds: PCBuild[];
+  catalog: "desktops" | "laptops";
+  onCatalogChange: (catalog: "desktops" | "laptops") => void;
 };
 
 function formatLoadedAt(date: Date): string {
@@ -27,6 +29,8 @@ export function AppHeader({
   onFile,
   loading,
   builds,
+  catalog,
+  onCatalogChange,
 }: AppHeaderProps) {
   const buildWarnings = builds
     .filter((b) => b.warnings.length > 0)
@@ -52,7 +56,10 @@ export function AppHeader({
       </div>
 
       <div className="ml-auto flex flex-wrap items-center gap-3">
-        {loaded && (
+        <nav aria-label="Product catalog" className="flex rounded-md border border-zinc-700 p-1 text-xs font-semibold">
+          {(["desktops", "laptops"] as const).map((item) => <button key={item} aria-pressed={catalog === item} onClick={() => onCatalogChange(item)} className={`rounded px-3 py-2 ${catalog === item ? "bg-zinc-800 text-amber-200" : "text-zinc-300 hover:bg-zinc-900"}`}>{item === "desktops" ? "Desktop builds" : "Laptops"}</button>)}
+        </nav>
+        {loaded && catalog === "desktops" && (
           <ViewSwitcher view={view} onChange={onViewChange} />
         )}
         {loaded && <ParserWarnings warnings={loaded.warnings} buildWarnings={buildWarnings} />}
