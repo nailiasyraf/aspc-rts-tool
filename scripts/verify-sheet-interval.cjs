@@ -19,8 +19,8 @@ const path = require('node:path');
       await route.fulfill({ json: { spreadsheetId: sheetId, title: 'Demo interval sheet', checkedAt: new Date().toISOString(), builds: [], tiktokProducts: [], warnings: [] } });
     });
     const interval = page.getByLabel('Check for changes every', { exact: true });
-    const summary = page.locator('summary').filter({ hasText: 'Google Sheets' });
-    const idle = () => page.waitForFunction(() => [...document.querySelectorAll('summary')].some(el => el.textContent.includes('Connected · checks every')));
+    const summary = page.getByRole('button', { name: 'Google Sheets settings', exact: true });
+    const idle = () => page.waitForFunction(() => document.querySelector('section[aria-label="Google Sheets connection"] [role=status]')?.textContent === 'Connected');
     async function advanceToCheck(ms) {
       const response = page.waitForResponse('**/api/google/sheet');
       await page.clock.fastForward(ms); await response; await idle();

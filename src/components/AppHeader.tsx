@@ -37,8 +37,8 @@ export function AppHeader({
     .map((b) => ({ name: b.name, warnings: b.warnings }));
 
   return (
-    <header className="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-zinc-800 bg-zinc-950 px-6 py-3">
-      <div className="min-w-0">
+    <header className="flex shrink-0 flex-wrap items-center gap-x-6 gap-y-3 border-b border-zinc-800 bg-zinc-950 px-4 py-3 md:px-6">
+      <div className="min-w-0 flex-1 basis-64">
         <h1 className="text-sm font-bold tracking-[0.18em] text-zinc-50">
           ASPC RTS TOOL
           <span className="ml-2 rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] font-semibold tracking-normal text-zinc-400">
@@ -46,7 +46,7 @@ export function AppHeader({
           </span>
         </h1>
         {loaded ? (
-          <p className="mt-0.5 truncate text-[11px] text-zinc-500">
+          <p className="mt-1 truncate text-xs text-zinc-400" title={loaded.fileName}>
             {loaded.fileName} • Marketing • {loaded.builds.length} builds •
             loaded {formatLoadedAt(loaded.loadedAt)}
           </p>
@@ -55,7 +55,7 @@ export function AppHeader({
         )}
       </div>
 
-      <div className="ml-auto flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2 lg:ml-auto lg:gap-3">
         <nav aria-label="Product catalog" className="flex rounded-md border border-zinc-700 p-1 text-xs font-semibold">
           {(["desktops", "laptops"] as const).map((item) => <button key={item} aria-pressed={catalog === item} onClick={() => onCatalogChange(item)} className={`rounded px-3 py-2 ${catalog === item ? "bg-zinc-800 text-amber-200" : "text-zinc-300 hover:bg-zinc-900"}`}>{item === "desktops" ? "Desktop builds" : "Laptops"}</button>)}
         </nav>
@@ -63,7 +63,7 @@ export function AppHeader({
           <ViewSwitcher view={view} onChange={onViewChange} />
         )}
         {loaded && <ParserWarnings warnings={loaded.warnings} buildWarnings={buildWarnings} />}
-        <FileUploader onFile={onFile} disabled={loading} />
+        <FileUploader onFile={onFile} disabled={loading} variant={loaded ? "ghost" : "primary"} />
       </div>
     </header>
   );

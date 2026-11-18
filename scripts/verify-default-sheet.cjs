@@ -38,11 +38,12 @@ const base = process.env.RTS_TEST_URL || 'http://127.0.0.1:3010';
         await page.locator('input[type=file]').first().setInputFiles(path.join(__dirname, '../sample-optimal-builds.xlsx'));
         await page.getByText(/sample-optimal-builds.xlsx/).first().waitFor(); releaseStatus();
       }
-      const panel = page.locator('details').filter({ has: page.locator('summary').filter({ hasText: 'Google Sheets' }) });
-      if (mode !== 'denied' && await panel.getAttribute('open') === null) await panel.locator('summary').click();
+      const openSettings = () => page.getByRole('button', { name: 'Google Sheets settings', exact: true }).click();
+      const idle = () => page.waitForFunction(() => document.querySelector('section[aria-label="Google Sheets connection"] [role=status]')?.textContent === 'Connected');
+      await openSettings();
       if (mode === 'signed-out') {
         await page.getByRole('button', { name: 'Sign in with Google', exact: true }).waitFor();
-        await page.getByText(/connect the team sheet automatically/).waitFor();
+        await page.getByText(/team sheet will connect automatically/).waitFor();
         assert.deepEqual(reads, []);
       } else if (['paused', 'no-default', 'invalid-default', 'upload-race'].includes(mode)) {
         await page.getByRole('button', { name: 'Sign out', exact: true }).waitFor();
@@ -55,7 +56,7 @@ const base = process.env.RTS_TEST_URL || 'http://127.0.0.1:3010';
         assert.equal(await page.getByLabel('Google Sheet link', { exact: true }).inputValue(), `https://docs.google.com/spreadsheets/d/${teamId}/edit`);
         await page.clock.fastForward(3 * 60 * 1000); assert.equal(reads.length, 1, 'Access denied must not retry repeatedly');
       } else {
-        await page.getByRole('button', { name: 'Check now', exact: true }).waitFor();
+        await idle();
         assert.deepEqual(reads, [mode === 'custom' ? customId : teamId]);
         assert.equal(await page.getByRole('complementary', { name: 'Build change notification' }).count(), 0);
         if (mode === 'fresh') {
@@ -66,11 +67,11 @@ const base = process.env.RTS_TEST_URL || 'http://127.0.0.1:3010';
             assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
           }
           await page.getByRole('button', { name: 'Pause checks', exact: true }).click();
-          await page.reload(); await panel.locator('summary').click();
+          await page.reload(); await openSettings();
           await page.getByRole('button', { name: 'Sign out', exact: true }).waitFor();
           await page.clock.fastForward(3 * 60 * 1000); assert.equal(reads.length, 1, 'Pause survives reload');
           await page.getByRole('button', { name: 'Connect sheet', exact: true }).click();
-          await page.getByRole('button', { name: 'Check now', exact: true }).waitFor(); assert.equal(reads.length, 2, 'Manual reconnect resumes');
+          await idle(); assert.equal(reads.length, 2, 'Manual reconnect resumes');
         }
       }
       assert.deepEqual(errors, []); await page.close();
