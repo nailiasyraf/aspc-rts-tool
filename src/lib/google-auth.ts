@@ -9,6 +9,11 @@ export const GOOGLE_SHEET_SCOPE = "https://www.googleapis.com/auth/spreadsheets.
 const sessionSchema = z.object({ user: z.object({ id: z.string(), email: z.string() }), accessToken: z.string(), refreshToken: z.string().optional(), expiresAt: z.number(), validUntil: z.number() });
 export type GoogleSession = z.infer<typeof sessionSchema>;
 
+export function defaultGoogleSheetId(): string | undefined {
+  const id = process.env.GOOGLE_DEFAULT_SHEET_ID?.trim();
+  return id && /^[A-Za-z0-9_-]{10,200}$/.test(id) ? id : undefined;
+}
+
 export function googleConfig() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;

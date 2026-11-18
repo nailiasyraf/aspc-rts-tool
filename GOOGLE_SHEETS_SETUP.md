@@ -23,6 +23,7 @@ GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=your-client-secret
 GOOGLE_SESSION_SECRET=your-random-base64-key
 GOOGLE_APP_URL=http://127.0.0.1:3010
+GOOGLE_DEFAULT_SHEET_ID=optional-team-spreadsheet-id
 ```
 
 Generate `GOOGLE_SESSION_SECRET` in your own terminal with:
@@ -31,17 +32,17 @@ Generate `GOOGLE_SESSION_SECRET` in your own terminal with:
 node -e "console.log(require('node:crypto').randomBytes(32).toString('base64'))"
 ```
 
-Restart the launcher after saving. Open exactly the configured origin: `127.0.0.1` and `localhost` are different OAuth origins. If port 3010 is busy with another app, stop that app or choose another port and update both `GOOGLE_APP_URL` and Google's registered redirect URI. For the hosted copy, set these four server environment variables in the hosting provider and redeploy; do not prefix them with `NEXT_PUBLIC_`.
+Restart the launcher after saving. Open exactly the configured origin: `127.0.0.1` and `localhost` are different OAuth origins. If port 3010 is busy with another app, stop that app or choose another port and update both `GOOGLE_APP_URL` and Google's registered redirect URI. For the hosted copy, set the four required Google variables and optional `GOOGLE_DEFAULT_SHEET_ID` in the hosting provider and redeploy; do not prefix them with `NEXT_PUBLIC_`. The default ID is the part between `/d/` and `/edit` in a Google Sheets URL. It is returned only after sign-in. This setting does not grant access: each colleague needs permission to read the team sheet through their own Google account.
 
 ## Using the feature
 
 1. Expand **Google Sheets** above the catalog and click **Sign in with Google**.
 2. Complete Google's sign-in and permission screen yourself.
-3. Paste the Google Sheet URL in **Google Sheet link**, then click **Connect sheet**.
+3. If a team sheet is configured, it connects automatically after sign-in on first use. An existing saved custom sheet takes priority. You can still paste another URL in **Google Sheet link** and click **Connect sheet**. Without a configured team sheet, paste a link as before. If access is denied, the link stays filled so you can retry after the sheet owner grants access.
 4. The first successful read establishes the baseline and fills the existing desktop and laptop pricing views. Subsequent successful reads update them automatically and preserve the selected desktop model when it still exists.
 5. Checks run every **2 minutes** by default while this page is open. **Check for changes every** offers **2, 5, 10, 15, 30 or 60 minutes**, saved in this browser across reloads. Changing it restarts the countdown from now; if a read is already running, the new interval starts when it finishes. Changing the interval does not resume paused checks. **Check now** runs immediately. A sleeping computer or throttled browser may delay a check; returning to the tab runs any overdue check. Nothing runs after the page is closed.
 6. **Change history** shows previous/current values, additions and removals, grouped by detection time. Filter the latest hour, 24 hours, 7 days or all saved history. It tracks the fields this tool uses, not every spreadsheet cell, formatting edit or editor identity. Renamed products appear as removed/added. Edits made and reverted between checks are not captured.
-7. **Pause checks** or an XLSX upload stops automatic updates. **Sign out** also removes this tool's Google session. To resume, sign in if needed and connect the link again.
+7. **Pause checks** or an XLSX upload stops automatic updates, including automatic connection on reload. Click **Connect sheet** to resume. **Sign out** also removes this tool's Google session; completing a fresh sign-in reconnects the configured team sheet. Pause state is saved separately per Google account in this browser when storage is available.
 8. Added, updated or removed products trigger an in-app popup, including changes to TikTok prices. **View changes** opens the history; **Dismiss** closes the popup. The initial baseline, unchanged checks and failed checks do not trigger alerts. A later successful check that detects changes replaces the popup with its latest summary; full details remain in history.
 9. For desktop alerts, click **Enable browser notifications** and allow the browser prompt. This optional preference is saved for this browser; **Turn off browser notifications** disables it. Browser/OS settings may suppress notifications. Unsupported or blocked browsers still show the in-app popup. Alerts run only while the tool is open and follow the selected check interval or **Check now**; they are not background push notifications after closing the tool.
 

@@ -43,13 +43,13 @@ export function GoogleSheetConnection({ connection }: { connection: ReturnType<t
     </aside>}
     <details ref={panelRef} className="shrink-0 border-b border-zinc-800 bg-zinc-950 text-sm" open={c.error ? true : undefined}>
       <summary className="cursor-pointer px-6 py-3 font-medium text-zinc-200 focus-visible:outline-2 focus-visible:outline-amber-400">
-        Google Sheets <span className="ml-2 font-normal text-zinc-400">{c.busy ? "Checking…" : c.sheetId ? `Connected · checks every ${c.checkMinutes} minutes` : c.status?.connected ? "Signed in · paste a sheet link to connect" : "Connect a spreadsheet"}</span>
+        Google Sheets <span className="ml-2 font-normal text-zinc-400">{c.busy ? "Checking…" : c.sheetId ? `Connected · checks every ${c.checkMinutes} minutes` : c.status?.connected ? "Signed in · connect a spreadsheet" : "Connect a spreadsheet"}</span>
       </summary>
       <div className="max-h-[55vh] space-y-4 overflow-y-auto px-6 pb-5">
         {!c.status && !c.error && <p role="status" className="text-zinc-400">Checking Google connection…</p>}
         {c.status && !c.status.configured && <p className="max-w-2xl leading-6 text-zinc-300">Google sign-in hasn’t been configured for this tool yet. The tool owner needs to complete Google connection setup. XLSX uploads remain available.</p>}
         {c.status?.configured && !c.status.connected && <>
-          <p className="max-w-2xl leading-6 text-zinc-400">Sign in with Google, then paste your sheet link. Google will ask for read-only access to your spreadsheets; this tool reads the Marketing and TikTok Price tabs of the sheet you connect.</p>
+          <p className="max-w-2xl leading-6 text-zinc-400">{c.status.hasDefaultSheet ? "Sign in with your company Google account to connect the team sheet automatically. You must have access to that sheet." : "Sign in with Google, then paste your sheet link."} Google will ask for read-only access to your spreadsheets; this tool reads the Marketing and TikTok Price tabs of the sheet you connect.</p>
           <form action="/api/google/connect" method="post"><button className={buttonStyle}>Sign in with Google</button></form>
         </>}
         {c.status?.connected && <>
@@ -57,6 +57,7 @@ export function GoogleSheetConnection({ connection }: { connection: ReturnType<t
             <p className="break-all text-zinc-300">Signed in as {c.status.user?.email}</p>
             <button className={buttonStyle} onClick={() => void c.disconnect()}>Sign out</button>
           </div>
+          {c.status.hasDefaultSheet && <p className="text-xs leading-5 text-zinc-400">The team sheet connects automatically on first use. You can connect a different sheet below; this browser remembers your choice.</p>}
           <form onSubmit={(event) => { event.preventDefault(); setPage(0); c.connect(); }} className="flex max-w-4xl flex-wrap items-end gap-3">
             <div className="min-w-0 flex-1 basis-72">
               <label htmlFor="google-sheet-link" className="mb-2 block text-zinc-200">Google Sheet link</label>

@@ -50,7 +50,7 @@ export function useGoogleSheet(onSnapshot: (snapshot: SheetSnapshot) => void) {
     requestRef.current?.abort(); requestRef.current = null;
     activeRef.current = null;
     setSheetId(null); setBusy(false); schedule(null);
-    try { if (userRef.current) localStorage.removeItem(connectionStorageKey(userRef.current.id)); } catch { /* In-memory pause still succeeds. */ }
+    try { if (userRef.current) localStorage.setItem(connectionStorageKey(userRef.current.id), "paused"); } catch { /* In-memory pause still succeeds. */ }
   }, [schedule, clear]);
 
   const check = useCallback(async (id: string, switching = false) => {
@@ -126,16 +126,23 @@ export function useGoogleSheet(onSnapshot: (snapshot: SheetSnapshot) => void) {
         } catch { setIntervalWarning("Saved check interval couldn’t be read. Using 2 minutes for this session."); }
         setStatus(result); userRef.current = result.user;
         const url = new URL(window.location.href);
+        const justSignedIn = url.searchParams.get("google") === "connected";
         if (url.searchParams.get("google") === "failed") setError("Google sign-in was cancelled or could not be completed. Try signing in again.");
         if (url.searchParams.has("google")) { url.searchParams.delete("google"); window.history.replaceState(null, "", url); }
         if (result.connected && result.user && generationRef.current === initialGeneration) {
+          let saved: string | null = null;
           try {
-            const saved = localStorage.getItem(connectionStorageKey(result.user.id));
-            if (saved && /^[A-Za-z0-9_-]{10,200}$/.test(saved)) {
-              setLink(`https://docs.google.com/spreadsheets/d/${saved}/edit`);
-              void check(saved, true);
-            }
-          } catch { setStorageWarning("Browser storage is unavailable. Paste your sheet link to connect for this session."); }
+            saved = localStorage.getItem(connectionStorageKey(result.user.id));
+          } catch { setStorageWarning("Browser storage is unavailable. You can still connect a sheet for this session."); }
+          const isId = (value: string | null | undefined): value is string => Boolean(value && /^[A-Za-z0-9_-]{10,200}$/.test(value));
+          const target = isId(saved) ? saved : isId(result.defaultSheetId) ? result.defaultSheetId : null;
+          if (target) {
+            setLink(`https://docs.google.com/spreadsheets/d/${target}/edit`);
+            if (saved !== "paused" || justSignedIn) void check(target, true);
+          }
+        } else if (result.connected && result.user && generationRef.current !== initialGeneration) {
+          // An upload/pause while status was loading must also survive a reload.
+          try { localStorage.setItem(connectionStorageKey(result.user.id), "paused"); } catch { /* The current session is already paused. */ }
         }
       } catch (failure) {
         if (!controller.signal.aborted) setError(failure instanceof Error ? failure.message : "Could not check Google sign-in. Reload the page to retry.");

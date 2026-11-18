@@ -13,6 +13,8 @@ export type SheetSnapshot = {
 export type GoogleStatus = {
   configured: boolean;
   connected: boolean;
+  hasDefaultSheet?: boolean;
+  defaultSheetId?: string;
   user?: { id: string; email: string };
 };
 

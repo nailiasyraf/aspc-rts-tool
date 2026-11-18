@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
 import { compareSnapshots, HISTORY_CHANGE_LIMIT, snapshotFromValues, spreadsheetIdFromLink, updateSheetHistory } from "../src/lib/google-sheet-data";
-import { googleConfig, isSameOrigin, seal, unseal } from "../src/lib/google-auth";
+import { defaultGoogleSheetId, googleConfig, isSameOrigin, seal, unseal } from "../src/lib/google-auth";
 
 const id = "example_sheet_12345";
 assert.equal(spreadsheetIdFromLink(`https://docs.google.com/spreadsheets/d/${id}/edit?gid=0#gid=0`), id);
@@ -46,6 +46,12 @@ assert.throws(() => unseal(tampered.toString("base64url"), key));
 assert.throws(() => unseal(encrypted, randomBytes(32)));
 const oldEnv = { ...process.env };
 try {
+  delete process.env.GOOGLE_DEFAULT_SHEET_ID;
+  assert.equal(defaultGoogleSheetId(), undefined);
+  process.env.GOOGLE_DEFAULT_SHEET_ID = " team_sheet_test_12345 ";
+  assert.equal(defaultGoogleSheetId(), "team_sheet_test_12345");
+  process.env.GOOGLE_DEFAULT_SHEET_ID = "https://docs.google.com/spreadsheets/d/team_sheet_test_12345/edit";
+  assert.equal(defaultGoogleSheetId(), undefined, "Only a valid spreadsheet ID is accepted");
   process.env.GOOGLE_CLIENT_ID = "test"; process.env.GOOGLE_CLIENT_SECRET = "test";
   process.env.GOOGLE_SESSION_SECRET = key.toString("base64"); process.env.GOOGLE_APP_URL = "http://127.0.0.1:3010";
   assert.equal(googleConfig()?.redirectUri, "http://127.0.0.1:3010/api/google/callback");

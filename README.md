@@ -16,11 +16,13 @@ Verify parsing and matching with `npx tsx scripts/verify-tiktok-pricing.mts`. Op
 
 ### Google Sheets connection and change history
 
-Expand **Google Sheets**, sign in, then paste a sheet link. The tool reads Marketing and optional TikTok Price data directly, checks every 2 minutes by default while open and refreshes automatically. Choose **2, 5, 10, 15, 30 or 60 minutes** under **Check for changes every**; the interval is saved in this browser. Changing it restarts the countdown without resuming paused checks. **Check now**, **Pause checks**, **Sign out**, and a history filter (hour/day/week/all) are available. XLSX upload remains supported and pauses syncing. The latest 1,000 detected field changes are saved in this browser per account and spreadsheet; the first read creates a baseline, and formatting or intermediate edits between checks are not tracked.
+Expand **Google Sheets** and sign in. If a team sheet is configured, it connects automatically on first use; otherwise paste a sheet link. The tool reads Marketing and optional TikTok Price data directly, checks every 2 minutes by default while open and refreshes automatically. Choose **2, 5, 10, 15, 30 or 60 minutes** under **Check for changes every**; the interval is saved in this browser. Changing it restarts the countdown without resuming paused checks. **Check now**, **Pause checks**, **Sign out**, and a history filter (hour/day/week/all) are available. XLSX upload remains supported and pauses syncing. The latest 1,000 detected field changes are saved in this browser per account and spreadsheet; the first read creates a baseline, and formatting or intermediate edits between checks are not tracked.
 
 Detected product additions, updates and removals show an in-app popup with **View changes**. Enable optional browser notifications in the Google Sheets panel to receive alerts while using another tab. Alerts require the tool to remain open; the baseline, unchanged checks and failed reads stay quiet.
 
 Real sign-in requires Google OAuth configuration. Follow [GOOGLE_SHEETS_SETUP.md](GOOGLE_SHEETS_SETUP.md) for the exact redirect URI, server environment variables, consent setup, storage behavior and validation steps. No credentials or private sheet URL are bundled.
+
+Set the optional server variable `GOOGLE_DEFAULT_SHEET_ID` to connect new users to the team sheet automatically after sign-in. Each user still needs Google permission to view it. A saved custom sheet takes priority, and paused checks stay paused across reloads. Completing a fresh sign-in resumes the default connection after a pause. The sheet ID is returned only to signed-in users, not embedded in the public frontend.
 
 ### Live laptop brochures
 
