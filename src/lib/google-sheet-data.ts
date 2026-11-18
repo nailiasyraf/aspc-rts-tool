@@ -3,7 +3,8 @@ import { parseMarketingSheet } from "./parser/parseMarketingSheet";
 import { readTikTokPricing } from "./parser/parseTikTokSheet";
 import type { SheetSnapshot, SheetChange, SheetHistory } from "@/types/google-sheet";
 
-export const SHEET_CHECK_INTERVAL = 15 * 60 * 1000;
+export const SHEET_CHECK_MINUTES = [2, 5, 10, 15, 30, 60] as const;
+export const DEFAULT_SHEET_CHECK_MINUTES = 2;
 export const HISTORY_CHANGE_LIMIT = 1000;
 
 export function spreadsheetIdFromLink(link: string): string {

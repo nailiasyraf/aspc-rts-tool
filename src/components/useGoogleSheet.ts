@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GoogleStatus, SheetHistory, SheetSnapshot } from "@/types/google-sheet";
-import { SHEET_CHECK_INTERVAL, compareSnapshots, spreadsheetIdFromLink, updateSheetHistory } from "@/lib/google-sheet-data";
+import { DEFAULT_SHEET_CHECK_MINUTES, SHEET_CHECK_MINUTES, compareSnapshots, spreadsheetIdFromLink, updateSheetHistory } from "@/lib/google-sheet-data";
 import { connectionStorageKey, readSheetHistory, writeSheetHistory } from "@/lib/sheet-history-storage";
 import { useSheetAlerts } from "./useSheetAlerts";
+
+const intervalStorageKey = "aspc-sheets-check-minutes-v1";
 
 export function useGoogleSheet(onSnapshot: (snapshot: SheetSnapshot) => void) {
   const alerts = useSheetAlerts();
@@ -18,6 +20,9 @@ export function useGoogleSheet(onSnapshot: (snapshot: SheetSnapshot) => void) {
   const [storageWarning, setStorageWarning] = useState<string | null>(null);
   const [nextCheck, setNextCheck] = useState<number | null>(null);
   const [lastChecked, setLastChecked] = useState<string | null>(null);
+  const [checkMinutes, setCheckMinutes] = useState<number>(DEFAULT_SHEET_CHECK_MINUTES);
+  const [intervalWarning, setIntervalWarning] = useState<string | null>(null);
+  const intervalRef = useRef<number>(DEFAULT_SHEET_CHECK_MINUTES);
   const applyRef = useRef(onSnapshot);
   const activeRef = useRef<string | null>(null);
   const userRef = useRef<GoogleStatus["user"]>(undefined);
@@ -28,6 +33,17 @@ export function useGoogleSheet(onSnapshot: (snapshot: SheetSnapshot) => void) {
   useEffect(() => { applyRef.current = onSnapshot; }, [onSnapshot]);
 
   const schedule = useCallback((time: number | null) => { nextRef.current = time; setNextCheck(time); }, []);
+  function changeCheckMinutes(minutes: number) {
+    if (!SHEET_CHECK_MINUTES.some((option) => option === minutes)) return;
+    intervalRef.current = minutes;
+    setCheckMinutes(minutes);
+    try {
+      localStorage.setItem(intervalStorageKey, String(minutes));
+      setIntervalWarning(null);
+    } catch { setIntervalWarning("The check interval applies for this session, but couldn’t be saved in this browser."); }
+    // Restart the countdown without resuming a paused source or overlapping a read.
+    if (activeRef.current && userRef.current && !requestRef.current) schedule(Date.now() + minutes * 60 * 1000);
+  }
   const pause = useCallback(() => {
     clear();
     generationRef.current += 1;
@@ -87,7 +103,7 @@ export function useGoogleSheet(onSnapshot: (snapshot: SheetSnapshot) => void) {
     } finally {
       if (generation === generationRef.current) {
         requestRef.current = null; setBusy(false);
-        if (activeRef.current && userRef.current) schedule(Date.now() + SHEET_CHECK_INTERVAL);
+        if (activeRef.current && userRef.current) schedule(Date.now() + intervalRef.current * 60 * 1000);
       }
     }
   }, [schedule, report, clear]);
@@ -101,6 +117,13 @@ export function useGoogleSheet(onSnapshot: (snapshot: SheetSnapshot) => void) {
         if (!response.ok) throw new Error("Could not check Google sign-in. Reload the page to retry.");
         const result: GoogleStatus = await response.json();
         if (controller.signal.aborted) return;
+        try {
+          const savedMinutes = Number(localStorage.getItem(intervalStorageKey));
+          if (SHEET_CHECK_MINUTES.some((option) => option === savedMinutes)) {
+            intervalRef.current = savedMinutes;
+            setCheckMinutes(savedMinutes);
+          }
+        } catch { setIntervalWarning("Saved check interval couldn’t be read. Using 2 minutes for this session."); }
         setStatus(result); userRef.current = result.user;
         const url = new URL(window.location.href);
         if (url.searchParams.get("google") === "failed") setError("Google sign-in was cancelled or could not be completed. Try signing in again.");
@@ -147,5 +170,6 @@ export function useGoogleSheet(onSnapshot: (snapshot: SheetSnapshot) => void) {
     } catch (failure) { setError((failure as Error).message); }
   }
   return { status, link, setLink, sheetId, history, busy, error, storageWarning, nextCheck, lastChecked, connect, pause, alerts,
+    checkMinutes, changeCheckMinutes, intervalWarning,
     checkNow: () => { if (activeRef.current) void check(activeRef.current); }, disconnect };
 }

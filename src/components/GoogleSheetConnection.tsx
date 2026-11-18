@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { useGoogleSheet } from "./useGoogleSheet";
+import { SHEET_CHECK_MINUTES } from "@/lib/google-sheet-data";
 
 const buttonStyle = "rounded-md border border-zinc-600 px-3 py-2 text-sm font-medium text-zinc-100 hover:bg-zinc-800 focus-visible:outline-2 focus-visible:outline-amber-400 disabled:opacity-50";
 const time = (value: string | number) => new Date(value).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -42,7 +43,7 @@ export function GoogleSheetConnection({ connection }: { connection: ReturnType<t
     </aside>}
     <details ref={panelRef} className="shrink-0 border-b border-zinc-800 bg-zinc-950 text-sm" open={c.error ? true : undefined}>
       <summary className="cursor-pointer px-6 py-3 font-medium text-zinc-200 focus-visible:outline-2 focus-visible:outline-amber-400">
-        Google Sheets <span className="ml-2 font-normal text-zinc-400">{c.busy ? "Checking…" : c.sheetId ? "Connected · checks every 15 minutes" : c.status?.connected ? "Signed in · paste a sheet link to connect" : "Connect a spreadsheet"}</span>
+        Google Sheets <span className="ml-2 font-normal text-zinc-400">{c.busy ? "Checking…" : c.sheetId ? `Connected · checks every ${c.checkMinutes} minutes` : c.status?.connected ? "Signed in · paste a sheet link to connect" : "Connect a spreadsheet"}</span>
       </summary>
       <div className="max-h-[55vh] space-y-4 overflow-y-auto px-6 pb-5">
         {!c.status && !c.error && <p role="status" className="text-zinc-400">Checking Google connection…</p>}
@@ -63,6 +64,16 @@ export function GoogleSheetConnection({ connection }: { connection: ReturnType<t
             </div>
             <button disabled={c.busy} className={buttonStyle}>Connect sheet</button>
           </form>
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-3 text-zinc-300">
+              <label htmlFor="sheet-check-interval">Check for changes every</label>
+              <select id="sheet-check-interval" value={c.checkMinutes} onChange={(event) => c.changeCheckMinutes(Number(event.target.value))} className="rounded-md border border-zinc-600 bg-zinc-900 px-3 py-2 text-zinc-100 focus-visible:outline-2 focus-visible:outline-amber-400">
+                {SHEET_CHECK_MINUTES.map((minutes) => <option key={minutes} value={minutes}>{minutes} minutes</option>)}
+              </select>
+            </div>
+            <p className="text-xs leading-5 text-zinc-400">Saved in this browser. Changing the interval restarts the countdown; paused checks stay paused.</p>
+            {c.intervalWarning && <p role="status" className="text-amber-200">{c.intervalWarning}</p>}
+          </div>
           {c.sheetId && <div className="flex flex-wrap items-center gap-3">
             <button onClick={c.checkNow} disabled={c.busy} className={buttonStyle}>Check now</button>
             <button onClick={c.pause} className={buttonStyle}>Pause checks</button>
@@ -71,7 +82,7 @@ export function GoogleSheetConnection({ connection }: { connection: ReturnType<t
           <div className="space-y-2 border-t border-zinc-800 pt-3">
             <p className="text-zinc-300">In-app popups are on for detected additions, updates and removals, including TikTok prices.</p>
             <button className={buttonStyle} disabled={c.alerts.permission === "unsupported"} onClick={() => void c.alerts.toggleBrowserAlerts()}>{c.alerts.enabled ? "Turn off browser notifications" : "Enable browser notifications"}</button>
-            <p className="max-w-3xl text-xs leading-5 text-zinc-400">{c.alerts.permission === "unsupported" ? "Browser notifications aren’t supported here. In-app popups will still appear." : c.alerts.permission === "denied" ? "Browser notifications are blocked in this site’s settings." : c.alerts.enabled ? "Browser notifications are on, including when you’re in another tab." : "Optional browser notifications can alert you while you’re in another tab."} Keep the tool open; alerts follow successful checks every 15 minutes or Check now.</p>
+            <p className="max-w-3xl text-xs leading-5 text-zinc-400">{c.alerts.permission === "unsupported" ? "Browser notifications aren’t supported here. In-app popups will still appear." : c.alerts.permission === "denied" ? "Browser notifications are blocked in this site’s settings." : c.alerts.enabled ? "Browser notifications are on, including when you’re in another tab." : "Optional browser notifications can alert you while you’re in another tab."} Keep the tool open; alerts follow successful checks every {c.checkMinutes} minutes or Check now.</p>
             {c.alerts.message && <p role="status" className="text-amber-200">{c.alerts.message}</p>}
           </div>
         </>}

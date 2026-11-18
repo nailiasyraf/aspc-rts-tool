@@ -46,7 +46,7 @@ function snapshot(version) {
       assert.equal(await notice.count(), 0, 'Initial baseline stays quiet');
       await panel.locator('summary').click();
       version = 1;
-      await page.clock.fastForward(15 * 60 * 1000 + 100);
+      await page.clock.fastForward(2 * 60 * 1000 + 100);
       await notice.waitFor();
       assert.match(await notice.innerText(), /1 added · 1 updated/);
       assert.equal(calls, 2);
@@ -81,6 +81,6 @@ function snapshot(version) {
       assert.deepEqual(errors, []);
       await context.close();
     }
-    console.log('PASS: additions/updates, collapsed-panel popup, 15-minute polling, history focus, baseline/unchanged/error silence, permission opt-in/denial/unsupported/failure, opt-out, pause, desktop/mobile fit.');
+    console.log('PASS: additions/updates, collapsed-panel popup, 2-minute polling, history focus, baseline/unchanged/error silence, permission opt-in/denial/unsupported/failure, opt-out, pause, desktop/mobile fit.');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
